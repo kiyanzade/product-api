@@ -10,11 +10,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
     <PackageReference Include="AutoMapper" Version="13.0.1" />
   </ItemGroup>
-	
-  <ItemGroup>
-    <Folder Include="UserService\" />
-    <Folder Include="ProductService\" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ProductProject.Database\ProductProject.Database.csproj" />
