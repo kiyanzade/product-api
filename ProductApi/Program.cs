@@ -23,6 +23,10 @@ namespace ProductApi
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
+
+                options.EnableAnnotations();
+
+
                 // Authorize in swagger with Token
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {

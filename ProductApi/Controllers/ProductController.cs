@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using ProductAPI.Data;
 using ProductAPI.Models;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Collections.Generic;
 using System.Security.Claims;
 
@@ -23,30 +25,26 @@ namespace ProductAPI.Controllers
         // GET: api/Products?owenr=username
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<ProductModel>>> GetProducts(string owner)
+        [SwaggerOperation(
+         Summary = "Get all products or filter by owner",
+         Description = "If you provide the 'owner' parameter, only products created by that owner will be returned."
+            )]
+        public async Task<ActionResult<IEnumerable<ProductModel>>> GetProducts(string? owner=null)
         {
-            /*   IEnumerable<ProductModel> productList;
-               if (string.IsNullOrEmpty(owner))
-               {
-                   productList = await _context.Products.ToListAsync();
-               }
-               else {
-                   productList = await _context.Products
-                   .Where(p => p.OwnerId == owner)
-                   .ToListAsync();
-               }
-               return productList;*/
-
+            IEnumerable<ProductModel> productList;
             if (string.IsNullOrEmpty(owner))
             {
-                return await _context.Products.ToListAsync();
+                productList = await _context.Products.ToListAsync();
             }
             else
             {
-                return await _context.Products
+                productList = await _context.Products
                 .Where(p => p.OwnerId == owner)
                 .ToListAsync();
             }
+            return Ok(productList);
+
+        
         }
 
         // GET: api/Products/5
@@ -67,11 +65,26 @@ namespace ProductAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<ProductModel>> PostProduct(ProductModel product)
         {
-            product.OwnerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException("User is not authorized.");
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
+            try
+            {
+                product.OwnerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException("User is not authorized.");
+                _context.Products.Add(product);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetProduct", new { id = product.Id }, product);
+                return CreatedAtAction("GetProduct", new { id = product.Id }, product);
+            }
+            catch (Exception ex)
+            { 
+                if(ex is DbUpdateException) // TODO: fix
+                {
+                    return Conflict("A product with the same ManufactureEmail and ProduceDate already exists.");
+                }
+                else
+                {
+                   return BadRequest(ex);
+                }
+            }
+         
         }
 
         // PUT: api/Products/5
