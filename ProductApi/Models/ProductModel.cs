@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Swashbuckle.AspNetCore.Annotations;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace ProductAPI.Models
@@ -6,13 +7,13 @@ namespace ProductAPI.Models
     public class ProductModel
     {
         [Key]
-        [JsonIgnore]
+        [SwaggerSchema(ReadOnly = true)]
         public int Id { get; set; }
 
         [Required]
         public string Name { get; set; }
 
-        [JsonIgnore]
+        [SwaggerSchema(ReadOnly = true)]
         public string? OwnerId { get; set; }
 
         [Required]

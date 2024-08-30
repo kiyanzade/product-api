@@ -99,30 +99,19 @@ namespace ProductAPI.Controllers
             var existingProduct = await _context.Products.FindAsync(id);
             if (existingProduct == null)
             {
-                return NotFound();
+                return NotFound("There is no product with this Id.");
             }
             if (existingProduct.OwnerId != User.FindFirstValue(ClaimTypes.NameIdentifier))
             {
-                return Forbid();
+                return Forbid("You are only able to change your product.");
             }
 
             _context.Entry(product).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+           
+            await _context.SaveChangesAsync();
+          
+        
 
             return NoContent();
         }
@@ -135,12 +124,12 @@ namespace ProductAPI.Controllers
            
             if (existingProduct == null)
             {
-                return NotFound();
+                return NotFound("There is no product with this Id.");
             }
 
             if (existingProduct.OwnerId != User.FindFirstValue(ClaimTypes.NameIdentifier)) 
             {
-                return Forbid();
+                return Forbid("You are only able to change your product.");
             }
 
             _context.Products.Remove(existingProduct);
