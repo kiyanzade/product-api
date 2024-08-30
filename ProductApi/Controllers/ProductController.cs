@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProductAPI.Data;
 using ProductAPI.Models;
+using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace ProductAPI.Controllers
@@ -19,11 +20,33 @@ namespace ProductAPI.Controllers
             _context = dbContext;
         }
 
-        // GET: api/Products
+        // GET: api/Products?owenr=username
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductModel>>> GetProducts()
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<ProductModel>>> GetProducts(string owner)
         {
-            return await _context.Products.ToListAsync();
+            /*   IEnumerable<ProductModel> productList;
+               if (string.IsNullOrEmpty(owner))
+               {
+                   productList = await _context.Products.ToListAsync();
+               }
+               else {
+                   productList = await _context.Products
+                   .Where(p => p.OwnerId == owner)
+                   .ToListAsync();
+               }
+               return productList;*/
+
+            if (string.IsNullOrEmpty(owner))
+            {
+                return await _context.Products.ToListAsync();
+            }
+            else
+            {
+                return await _context.Products
+                .Where(p => p.OwnerId == owner)
+                .ToListAsync();
+            }
         }
 
         // GET: api/Products/5
@@ -44,7 +67,7 @@ namespace ProductAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<ProductModel>> PostProduct(ProductModel product)
         {
-            product.OwnerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            product.OwnerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException("User is not authorized.");
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
