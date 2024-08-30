@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProductAPI.Data;
 using ProductAPI.Models;
+using System.Security.Claims;
 
 namespace ProductAPI.Controllers
 {
@@ -43,6 +44,7 @@ namespace ProductAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<ProductModel>> PostProduct(ProductModel product)
         {
+            product.OwnerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
@@ -56,6 +58,16 @@ namespace ProductAPI.Controllers
             if (id != product.Id)
             {
                 return BadRequest();
+            }
+
+            var existingProduct = await _context.Products.FindAsync(id);
+            if (existingProduct == null)
+            {
+                return NotFound();
+            }
+            if (existingProduct.OwnerId != User.FindFirstValue(ClaimTypes.NameIdentifier))
+            {
+                return Forbid();
             }
 
             _context.Entry(product).State = EntityState.Modified;
@@ -83,13 +95,19 @@ namespace ProductAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            var existingProduct = await _context.Products.FindAsync(id);
+           
+            if (existingProduct == null)
             {
                 return NotFound();
             }
 
-            _context.Products.Remove(product);
+            if (existingProduct.OwnerId != User.FindFirstValue(ClaimTypes.NameIdentifier)) 
+            {
+                return Forbid();
+            }
+
+            _context.Products.Remove(existingProduct);
             await _context.SaveChangesAsync();
 
             return NoContent();

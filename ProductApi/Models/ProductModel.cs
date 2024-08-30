@@ -11,6 +11,9 @@ namespace ProductAPI.Models
         public string Name { get; set; }
 
         [Required]
+        public string OwnerId { get; set; }
+
+        [Required]
         public DateTime ProduceDate { get; set; }
 
         [Required]
