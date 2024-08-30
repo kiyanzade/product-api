@@ -23,13 +23,46 @@ public class UserService : IUserService
         _configuration = configuration;
     }
 
-    public async Task Register(RegisterDto dto)
+    public async Task<IdentityResult> Register(RegisterDto dto)
     {
-        throw new NotImplementedException();
+        var user = new ApplicationUser()
+        {
+            UserName = dto.Username,
+            Email = dto.Email
+        };
+
+        var result = await _userManager.CreateAsync(user, dto.Password);
+        return result;
     }
 
     public async Task<TokenDto> Login(LoginDto dto)
     {
-        throw new NotImplementedException();
+        var user = await _userManager.FindByNameAsync(dto.Username);
+
+        if (user == null || !(await _userManager.CheckPasswordAsync(user, dto.Password)))
+        {
+            throw new BadHttpRequestException("");
+        }
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            _configuration["Jwt:Issuer"],
+            _configuration["Jwt:Issuer"],
+            claims,
+            expires: DateTime.Now.AddMinutes(30),
+            signingCredentials: creds);
+
+        return new TokenDto()
+        {
+            Token = new JwtSecurityTokenHandler().WriteToken(token)!
+        };
     }
 }
