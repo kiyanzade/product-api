@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using ProductApi.Models;
-using ProductAPI.Models;
+using ProductProject.Database.Entities;
 
-
-namespace ProductAPI.Data
+namespace ProductProject.Database.Contexts
 {
     public class ProductContext : IdentityDbContext<ApplicationUser>
     {

@@ -1,32 +1,34 @@
-﻿using Swashbuckle.AspNetCore.Annotations;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace ProductAPI.Models
+namespace ProductProject.Database.Entities
 {
     public class ProductModel
     {
         [Key]
-        [SwaggerSchema(ReadOnly = true)]
+        
         public int Id { get; set; }
 
         [Required]
+        [StringLength(50)]
         public string Name { get; set; }
-
-        [SwaggerSchema(ReadOnly = true)]
-        public string? OwnerId { get; set; }
 
         [Required]
         public DateTime ProduceDate { get; set; }
 
         [Required]
         [Phone]
+        [StringLength(11)]
         public string ManufacturePhone { get; set; }
 
         [Required]
         [EmailAddress]
+        [StringLength(100)]
         public string ManufactureEmail { get; set; }
 
         public bool IsAvailable { get; set; }
+
+        public string OwnerId { get; set; }
+
+        public ApplicationUser Owner { get; set; }
     }
 }

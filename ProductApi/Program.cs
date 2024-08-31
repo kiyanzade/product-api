@@ -4,9 +4,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using ProductAPI.Data;
-using ProductApi.Models;
+using ProductProject.Database.Contexts;
+using ProductProject.Database.Entities;
 using ProductProject.Service.ProductService;
+using ProductProject.Service.ProductService.Dto;
 using ProductProject.Service.UserService;
 
 namespace ProductProject.Api
@@ -23,6 +24,15 @@ namespace ProductProject.Api
             builder.Services.AddScoped<IProductService, ProductService>();
 
             builder.Services.AddControllers();
+            builder.Services.AddAutoMapper(config =>
+            {
+                config.CreateMap<ProductModel, GetProductDto>();
+                config.CreateMap<ProductModel, AddProductDto>();
+                config.CreateMap<ProductModel, EditProductDto>();
+
+                config.CreateMap<AddProductDto, ProductModel>();
+                
+            });
             builder.Services.AddHttpContextAccessor(); 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -100,6 +110,7 @@ namespace ProductProject.Api
                 app.UseSwaggerUI();
             }
 
+        
             app.UseHttpsRedirection();
 
             app.UseAuthorization();

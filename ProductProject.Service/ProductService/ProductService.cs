@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using ProductAPI.Data;
 using ProductProject.Service.ProductService.Dto;
-using ProductAPI.Models;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
+using ProductProject.Database.Contexts;
+using ProductProject.Database.Entities;
 
 namespace ProductProject.Service.ProductService;
 
@@ -21,10 +21,10 @@ public class ProductService : IProductService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<IList<GetProductDto>> GetProducts(string? owner)
+    public async Task<IList<GetProductDto>> GetProducts(string? ownerId)
     {
         IList<GetProductDto> productsDto = new List<GetProductDto>();
-        if (string.IsNullOrEmpty(owner))
+        if (string.IsNullOrEmpty(ownerId))
         {
 
            var productList = await _dbContext.Products.ToListAsync();
@@ -39,7 +39,7 @@ public class ProductService : IProductService
         else
         {
            var productList = await _dbContext.Products
-                .Where(p => p.OwnerId == owner)
+                .Where(p => p.OwnerId == ownerId)
                 .ToListAsync();
            foreach (var product in productList)
            {
@@ -97,6 +97,7 @@ public class ProductService : IProductService
         }
           
         var product = _mapper.Map<ProductModel>(dto);
+        product.OwnerId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)?? throw new UnauthorizedAccessException();
         _dbContext.Products.Add(product);
         await _dbContext.SaveChangesAsync();
     }

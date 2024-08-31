@@ -2,8 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ProductAPI.Data;
-using ProductAPI.Models;
+using ProductProject.Database.Entities;
 using ProductProject.Service.ProductService;
 using ProductProject.Service.ProductService.Dto;
 using Swashbuckle.AspNetCore.Annotations;
@@ -46,25 +45,25 @@ namespace ProductProject.Api.Controllers
 
         // POST: api/Products
         [HttpPost]
-        public async Task<ActionResult<ProductModel>> PostProduct(AddProductDto product)
+        public async Task<ActionResult> PostProduct([FromBody] AddProductDto product)
         {
-            // try
-            // {
-            //     product.OwnerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException("User is not authorized.");
-            //     _productService.AddProduct(product)
-            // }
-            // catch (Exception ex)
-            // { 
-            //     if(ex is DbUpdateException) // TODO: fix
-            //     {
-            //         return Conflict("A product with the same ManufactureEmail and ProduceDate already exists.");
-            //     }
-            //     else
-            //     {
-            //        return BadRequest(ex);
-            //     }
-            // }
-            throw new NotImplementedException();
+            try
+            {
+               await _productService.AddProduct(product);
+               return Ok();
+            }
+            catch (Exception ex)
+            { 
+                if(ex is DbUpdateException) // TODO: fix
+                {
+                    return Conflict("A product with the same ManufactureEmail and ProduceDate already exists.");
+                }
+                else
+                {
+                   return BadRequest(ex);
+                }
+            }
+        
 
         }
 
