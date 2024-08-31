@@ -57,7 +57,7 @@ public class ProductService : IProductService
 
         if (product == null)
         {
-            throw new FileNotFoundException("There is no product with this Id."); // TODO test exceptions
+            throw new FileNotFoundException("There is no product with this Id.");
         }
         var dto = _mapper.Map<GetProductDto>(product);
 
@@ -73,7 +73,14 @@ public class ProductService : IProductService
         }
         if (existingProduct.OwnerId != _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier))
         {
-            throw new Exception("You are only able to change your product.");
+            throw new BadHttpRequestException("You are only able to change your product.");
+        }
+        var conflictCheck = _dbContext.Products
+            .Any(product => product.ProduceDate == dto.ProduceDate && product.ManufactureEmail == dto.ManufactureEmail);
+
+        if (conflictCheck)
+        {
+            throw new BadHttpRequestException("A product with the same ManufactureEmail and ProduceDate already exists.");
         }
 
         existingProduct.IsAvailable = dto.IsAvailable;
@@ -93,7 +100,7 @@ public class ProductService : IProductService
 
         if (conflictCheck)
         {
-            throw new Exception("A product with the same ManufactureEmail and ProduceDate already exists.");
+            throw new BadHttpRequestException("A product with the same ManufactureEmail and ProduceDate already exists.");
         }
           
         var product = _mapper.Map<ProductModel>(dto);
@@ -111,7 +118,7 @@ public class ProductService : IProductService
         }
         if (existingProduct.OwnerId != _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier))
         {
-            throw new Exception("You are only able to change your product.");
+            throw new BadHttpRequestException("You are only able to change your product.");
         }
 
         _dbContext.Products.Remove(existingProduct);

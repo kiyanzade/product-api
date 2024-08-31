@@ -21,7 +21,7 @@ namespace ProductProject.Api.Controllers
             _productService = productService;
         }
 
-        // GET: api/Products?owenr=username
+        // GET: api/Products?owenr=UserId
         [HttpGet]
         [AllowAnonymous]
         [SwaggerOperation(
@@ -39,8 +39,21 @@ namespace ProductProject.Api.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ProductModel>> GetProduct(int id)
         {
-            var product = await _productService.GetProduct(id);
-            return Ok(product);
+            try
+            {
+                var product = await _productService.GetProduct(id);
+                return Ok(product);
+            }
+            catch(IOException ex)
+            {
+                if (ex is FileNotFoundException)
+                {
+                    return NotFound(ex);
+                }
+
+                return BadRequest(ex);
+            }
+         
         }
 
         // POST: api/Products
@@ -50,39 +63,52 @@ namespace ProductProject.Api.Controllers
             try
             {
                await _productService.AddProduct(product);
-               return Ok();
+               return Ok("Product added successfully.");
             }
-            catch (Exception ex)
+            catch (IOException ex)
             { 
-                if(ex is DbUpdateException) // TODO: fix
-                {
-                    return Conflict("A product with the same ManufactureEmail and ProduceDate already exists.");
-                }
-                else
-                {
-                   return BadRequest(ex);
-                }
+                return BadRequest(ex.Message);
             }
-        
-
         }
 
         // PUT: api/Products/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct(int id, EditProductDto product)
         {
-            
-            await  _productService.EditProduct(id, product);
-            return Ok();
+            try
+            {
+                await _productService.EditProduct(id, product);
+                return Ok();
+            }
+            catch (IOException ex)
+            {
+                if (ex is FileNotFoundException)
+                {
+                    return NotFound(ex);
+                }
+                return BadRequest(ex);
+            }
+           
         }
 
         // DELETE: api/Products/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            await _productService.DeleteProduct(id);
-
-            return Ok();
+            try
+            {
+                await _productService.DeleteProduct(id);
+                return Ok();
+            }
+            catch (IOException ex)
+            {
+                if (ex is FileNotFoundException)
+                {
+                    return NotFound(ex);
+                }
+                return BadRequest(ex);
+            }
+            
         }
 
     }
