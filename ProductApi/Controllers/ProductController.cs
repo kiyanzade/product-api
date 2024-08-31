@@ -1,7 +1,5 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using ProductProject.Database.Entities;
 using ProductProject.Service.ProductService;
 using ProductProject.Service.ProductService.Dto;
@@ -25,8 +23,8 @@ namespace ProductProject.Api.Controllers
         [HttpGet]
         [AllowAnonymous]
         [SwaggerOperation(
-         Summary = "Get all products or filter by owner",
-         Description = "If you provide the 'owner' parameter, only products created by that owner will be returned."
+         Summary = "Get all products or filter by ownerId",
+         Description = "If you provide the 'owner' parameter, only products created by that owner will be returned.\nex: api/Products?owenr=510a8a45-1b88-4012-94a6-a21c094ed2f9"
             )]
         public async Task<ActionResult<IEnumerable<ProductModel>>> GetProducts(string? owner=null)
         {
@@ -37,6 +35,10 @@ namespace ProductProject.Api.Controllers
 
         // GET: api/Products/5
         [HttpGet("{id:int}")]
+        [SwaggerOperation(
+            Summary = "Get product by productId",
+            Description = "ex: api/Products/5"
+        )]
         public async Task<ActionResult<ProductModel>> GetProduct(int id)
         {
             try
@@ -57,6 +59,9 @@ namespace ProductProject.Api.Controllers
 
         // POST: api/Products
         [HttpPost]
+        [SwaggerOperation(
+            Summary = "Add A product"
+        )]
         public async Task<ActionResult> PostProduct([FromBody] AddProductDto product)
         {
             try
@@ -72,6 +77,9 @@ namespace ProductProject.Api.Controllers
 
         // PUT: api/Products/5
         [HttpPut("{id}")]
+        [SwaggerOperation(
+            Summary = "Edit product by productId"
+        )]
         public async Task<IActionResult> PutProduct(int id, EditProductDto product)
         {
             try
@@ -92,6 +100,9 @@ namespace ProductProject.Api.Controllers
 
         // DELETE: api/Products/5
         [HttpDelete("{id}")]
+        [SwaggerOperation(
+            Summary = "Deleted product by productId"
+        )]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             try

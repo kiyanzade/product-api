@@ -1,11 +1,7 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Mvc;
 using ProductProject.Service.UserService;
 using ProductProject.Service.UserService.Dto;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace ProductProject.Api.Controllers
 {
@@ -22,6 +18,9 @@ namespace ProductProject.Api.Controllers
 
 
         [HttpPost("register")]
+        [SwaggerOperation(
+            Summary = "Register new user"
+        )]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
                var result = await _userService.Register(dto);
@@ -39,6 +38,10 @@ namespace ProductProject.Api.Controllers
 
 
         [HttpPost("login")]
+        [SwaggerOperation(
+            Summary = "Login User",
+            Description = "Receive the token in the response and use it to authenticate swagger"
+        )]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
             try
