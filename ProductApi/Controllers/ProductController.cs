@@ -48,10 +48,9 @@ namespace ProductProject.Api.Controllers
             {
                 if (ex is FileNotFoundException)
                 {
-                    return NotFound(ex);
+                    return NotFound(ex.Message);
                 }
-
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
          
         }
@@ -84,9 +83,9 @@ namespace ProductProject.Api.Controllers
             {
                 if (ex is FileNotFoundException)
                 {
-                    return NotFound(ex);
+                    return NotFound(ex.Message);
                 }
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
            
         }
@@ -98,15 +97,15 @@ namespace ProductProject.Api.Controllers
             try
             {
                 await _productService.DeleteProduct(id);
-                return Ok();
+                return Ok("Product deleted successfully.");
             }
             catch (IOException ex)
             {
                 if (ex is FileNotFoundException)
                 {
-                    return NotFound(ex);
+                    return NotFound(ex.Message);
                 }
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
             
         }
