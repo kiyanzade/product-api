@@ -1,25 +1,25 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using ProductAPI.Data;
 using ProductAPI.Models;
+using ProductProject.Service.ProductService;
+using ProductProject.Service.ProductService.Dto;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Collections.Generic;
-using System.Security.Claims;
 
-namespace ProductAPI.Controllers
+namespace ProductProject.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
     public class ProductsController : ControllerBase
     {
-        private readonly ProductContext _context;
+        private readonly IProductService _productService;
 
-        public ProductsController(ProductContext dbContext)
+        public ProductsController(IProductService productService)
         {
-            _context = dbContext;
+            _productService = productService;
         }
 
         // GET: api/Products?owenr=username
@@ -31,116 +31,60 @@ namespace ProductAPI.Controllers
             )]
         public async Task<ActionResult<IEnumerable<ProductModel>>> GetProducts(string? owner=null)
         {
-            IEnumerable<ProductModel> productList;
-            if (string.IsNullOrEmpty(owner))
-            {
-                productList = await _context.Products.ToListAsync();
-            }
-            else
-            {
-                productList = await _context.Products
-                .Where(p => p.OwnerId == owner)
-                .ToListAsync();
-            }
+            var productList = await _productService.GetProducts(owner);
             return Ok(productList);
 
-        
         }
 
         // GET: api/Products/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<ProductModel>> GetProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            return product;
+            var product = await _productService.GetProduct(id);
+            return Ok(product);
         }
 
         // POST: api/Products
         [HttpPost]
-        public async Task<ActionResult<ProductModel>> PostProduct(ProductModel product)
+        public async Task<ActionResult<ProductModel>> PostProduct(AddProductDto product)
         {
-            try
-            {
-                product.OwnerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException("User is not authorized.");
-                _context.Products.Add(product);
-                await _context.SaveChangesAsync();
+            // try
+            // {
+            //     product.OwnerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException("User is not authorized.");
+            //     _productService.AddProduct(product)
+            // }
+            // catch (Exception ex)
+            // { 
+            //     if(ex is DbUpdateException) // TODO: fix
+            //     {
+            //         return Conflict("A product with the same ManufactureEmail and ProduceDate already exists.");
+            //     }
+            //     else
+            //     {
+            //        return BadRequest(ex);
+            //     }
+            // }
+            throw new NotImplementedException();
 
-                return CreatedAtAction("GetProduct", new { id = product.Id }, product);
-            }
-            catch (Exception ex)
-            { 
-                if(ex is DbUpdateException) // TODO: fix
-                {
-                    return Conflict("A product with the same ManufactureEmail and ProduceDate already exists.");
-                }
-                else
-                {
-                   return BadRequest(ex);
-                }
-            }
-         
         }
 
         // PUT: api/Products/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(int id, ProductModel product)
+        public async Task<IActionResult> PutProduct(int id, EditProductDto product)
         {
-            if (id != product.Id)
-            {
-                return BadRequest();
-            }
-
-            var existingProduct = await _context.Products.FindAsync(id);
-            if (existingProduct == null)
-            {
-                return NotFound("There is no product with this Id.");
-            }
-            if (existingProduct.OwnerId != User.FindFirstValue(ClaimTypes.NameIdentifier))
-            {
-                return Forbid("You are only able to change your product.");
-            }
-
-            _context.Entry(product).State = EntityState.Modified;
-
-           
-            await _context.SaveChangesAsync();
-          
-        
-
-            return NoContent();
+            
+            await  _productService.EditProduct(id, product);
+            return Ok();
         }
 
         // DELETE: api/Products/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            var existingProduct = await _context.Products.FindAsync(id);
-           
-            if (existingProduct == null)
-            {
-                return NotFound("There is no product with this Id.");
-            }
+            await _productService.DeleteProduct(id);
 
-            if (existingProduct.OwnerId != User.FindFirstValue(ClaimTypes.NameIdentifier)) 
-            {
-                return Forbid("You are only able to change your product.");
-            }
-
-            _context.Products.Remove(existingProduct);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return Ok();
         }
 
-        private bool ProductExists(int id)
-        {
-            return _context.Products.Any(e => e.Id == id);
-        }
     }
 }
