@@ -83,11 +83,7 @@ public class ProductService : IProductService
             throw new BadHttpRequestException("A product with the same ManufactureEmail and ProduceDate already exists.");
         }
 
-        existingProduct.IsAvailable = dto.IsAvailable;
-        existingProduct.Name = dto.Name;
-        existingProduct.ManufactureEmail = dto.ManufactureEmail;
-        existingProduct.ManufacturePhone = dto.ManufacturePhone;
-        existingProduct.ProduceDate = dto.ProduceDate;
+        UpdateProductFields(existingProduct,dto);
 
         await _dbContext.SaveChangesAsync();
 
@@ -123,5 +119,30 @@ public class ProductService : IProductService
 
         _dbContext.Products.Remove(existingProduct);
         await _dbContext.SaveChangesAsync();
+    }
+
+
+    private void UpdateProductFields(ProductModel existingProduct, EditProductDto dto)
+    {
+        if (dto.IsAvailable != null)
+        {
+            existingProduct.IsAvailable = dto.IsAvailable.Value;
+        }
+        if (!string.IsNullOrEmpty(dto.Name))
+        {
+            existingProduct.Name = dto.Name;
+        }
+        if (!string.IsNullOrEmpty(dto.ManufactureEmail))
+        {
+            existingProduct.ManufactureEmail = dto.ManufactureEmail;
+        }
+        if (!string.IsNullOrEmpty(dto.ManufacturePhone))
+        {
+            existingProduct.ManufacturePhone = dto.ManufacturePhone;
+        }
+        if (dto.ProduceDate != null)
+        {
+            existingProduct.ProduceDate = dto.ProduceDate.Value;
+        }
     }
 }
