@@ -106,8 +106,7 @@ namespace ProductProject.Api
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerAndUi();
             }
 
         
@@ -115,7 +114,7 @@ namespace ProductProject.Api
 
             app.UseAuthorization();
 
-
+            app.InitializeDatabase();
             app.MapControllers();
 
             app.Run();
