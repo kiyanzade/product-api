@@ -41,8 +41,16 @@ namespace ProductProject.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var res = await _userService.Login(dto);
-            return Ok(res);
+            try
+            {
+                var res = await _userService.Login(dto);
+                return Ok(res);
+            }
+            catch (IOException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+           
         }
 
     }

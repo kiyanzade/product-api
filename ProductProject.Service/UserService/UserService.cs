@@ -41,7 +41,7 @@ public class UserService : IUserService
 
         if (user == null || !(await _userManager.CheckPasswordAsync(user, dto.Password)))
         {
-            throw new BadHttpRequestException("");
+            throw new BadHttpRequestException("The user information is incorrect.");
         }
 
         var claims = new[]
